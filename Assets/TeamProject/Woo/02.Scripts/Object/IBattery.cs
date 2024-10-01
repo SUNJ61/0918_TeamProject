@@ -4,5 +4,6 @@ using UnityEngine;
 
 public interface IBattery 
 {
+
     float ChargeBattery { get; set; }
 }

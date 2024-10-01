@@ -3,11 +3,15 @@ using System.Collections.Generic;
 using UnityEngine;
 public class PlayerHealth : CretureUpdate
 {
-    private FlashLight FlashLight;
-
     private object[] param = new object[2];
 
     private int MobCount;
+    [SerializeField]private int flash_Index;
+    public int Flash_Index
+    {
+        get { return flash_Index; }
+        set { flash_Index = value +1; }
+    }
 
     private readonly float Enemy_Damage = 5.0f;
     private readonly float Player_HealPack = 3.0f;
@@ -18,7 +22,6 @@ public class PlayerHealth : CretureUpdate
     private void Awake()
     {
         param[1] = Enemy_Damage;
-        FlashLight = GameObject.Find("Flash").transform.GetChild(0).GetComponent<FlashLight>();
     }
     protected override void OnEnable()
     {
@@ -33,17 +36,15 @@ public class PlayerHealth : CretureUpdate
             GameManager.G_instance.isGameover = true;
 
             GameObject demon = (GameObject)param[0];
-            demon.SendMessage("KillPlayer", SendMessageOptions.DontRequireReceiver);
-
-            FlashLight flashLight;
-
-            FlashLight.SendMessage("KillPlayer");
+            FlashLight flash = transform.GetChild(0).GetChild(flash_Index).GetChild(0).GetComponent<FlashLight>();
+            demon.SendMessage("KillPlayer");
+            flash.SendMessage("KillPlayer");
         }
         else if(dead && MobCount == 1)
         {
             GameManager.G_instance.isGameover = true;
-
-            FlashLight.SendMessage("KillPlayer");
+            FlashLight flash = transform.GetChild(0).GetChild(flash_Index).GetChild(0).GetComponent<FlashLight>();
+            flash.SendMessage("KillPlayer");
         }
     }
 

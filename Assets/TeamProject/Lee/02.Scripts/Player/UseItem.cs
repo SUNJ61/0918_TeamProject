@@ -5,7 +5,7 @@ using UnityEngine;
 public class UseItem : MonoBehaviour
 {
     [SerializeField] private List<GameObject> ItemSlots = new List<GameObject>();
-    private Transform CamTransform;
+    private Transform Camera_Tr;
 
     private float prevTime;
 
@@ -20,19 +20,27 @@ public class UseItem : MonoBehaviour
         get { return canShoot; }
         set { canShoot = value; }
     }
-    [SerializeField] private bool isFire; //마우스 왼쪽 버튼이 눌렸을 때 업데이트
-    public bool IsFire
+
+    [SerializeField] private bool isFlash;
+    public bool IsFlash
     {
-        get { return isFire; }
-        set { isFire = value; }
+        get { return isFlash; }
+        set { isFlash = value; }
+    }
+
+    [SerializeField] private bool isUse; //마우스 왼쪽 버튼이 눌렸을 때 업데이트
+    public bool IsUse
+    {
+        get { return isUse; }
+        set { isUse = value; }
     }
     void Awake()
     {
-        CamTransform = transform.GetChild(0).transform;
+        Camera_Tr = transform.GetChild(0).transform;
 
-        for (int i = 0; i < CamTransform.childCount; i++)
+        for (int i = 0; i < Camera_Tr.childCount; i++)
         {
-            ItemSlots.Add(CamTransform.GetChild(i).gameObject);
+            ItemSlots.Add(Camera_Tr.GetChild(i).gameObject);
         }
         ItemSlots.RemoveAt(0);
 
@@ -47,13 +55,14 @@ public class UseItem : MonoBehaviour
     }
     private void UsingItem() //모든 아이템 사용 함수들 만들기.
     {
-        Fire();
+        UseFire();
+        UseFlashLight();
     }
-    private void Fire()
+    private void UseFire()
     {
-        if (CanShoot && IsFire && Time.time - prevTime > Delay)
+        if (CanShoot && IsUse && Time.time - prevTime > Delay)
         {
-            Ray ray = new Ray(CamTransform.position + (CamTransform.forward * fireOffset), CamTransform.forward);
+            Ray ray = new Ray(Camera_Tr.position + (Camera_Tr.forward * fireOffset), Camera_Tr.forward);
             RaycastHit hit;
             if (Physics.Raycast(ray, out hit, FireDist, 1 << 7))
             {
@@ -67,18 +76,39 @@ public class UseItem : MonoBehaviour
             }
             for (int i = 0; i < ItemSlots.Count - 1; i++)
             {
-                if (ItemSlots[i].transform.GetChild(0) != null)
+                if (ItemSlots[i].transform.childCount != 0)
                 {
                     string item_name = ItemSlots[i].transform.GetChild(0).name;
                     if (item_name == "Gun")
                     {
                         Gunstate gun = ItemSlots[i].transform.GetChild(0).GetComponent<Gunstate>();
                         gun.InitBullet = 1;
+                        prevTime = Time.time;
                         break;
                     }
                 }
             }
-            prevTime = Time.time;
+        }
+    }
+
+    private void UseFlashLight()
+    {
+        if (IsUse && IsFlash && Time.time - prevTime > Delay)
+        {
+            for (int i = 0; i < ItemSlots.Count - 1; i++)
+            {
+                if (ItemSlots[i].transform.childCount != 0)
+                {
+                    string item_name = ItemSlots[i].transform.GetChild(0).name;
+                    if (item_name == "flashlight")
+                    {
+                        FlashLight flash = ItemSlots[i].transform.GetChild(0).GetComponent<FlashLight>();
+                        flash.SendMessage("ToggleFlashlights", SendMessageOptions.DontRequireReceiver);
+                        prevTime = Time.time;
+                        break;
+                    }
+                }
+            }
         }
     }
 

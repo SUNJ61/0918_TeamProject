@@ -20,7 +20,7 @@ public class Gunstate : MonoBehaviour
     {
         ParentName = transform.parent.parent.parent.name; // 건 위치 정보 계속 업데이트
 
-        if (ParentName == "Player") //아이템 슬롯 안에 있을 때
+        if (ParentName == "Player") //아이템 슬롯 안에 있을 때 (추후 손에 들었을 때 조건 업데이트 필요)
         {
             UseItem item = transform.parent.parent.parent.GetComponent<UseItem>();
 

@@ -13,11 +13,16 @@ public class FlashLight : MonoBehaviour
     [SerializeField] Image flash_Battery_BG;
     [SerializeField] Image Aim;
     [SerializeField] CamerRay camerRay;
+
+    [SerializeField] private string ParentName;
+
     bool isOn = false;
+
     float timer = 60f;
 
     void Start()
     {
+        //timer = 0f;
 
         FlashLight_transform = transform;
         
@@ -26,16 +31,30 @@ public class FlashLight : MonoBehaviour
         flash_Battery= GameObject.Find("PlayerUi").transform.GetChild(2).GetChild(1).GetComponent<Image>();
         flash_Battery_BG = GameObject.Find("PlayerUi").transform.GetChild(2).GetChild(2).GetComponent<Image>();
         Aim = GameObject.Find("PlayerUi").transform.GetChild(0).GetComponent<Image>();
-        camerRay = Camera.main.GetComponent<CamerRay>();
-        
+        camerRay = GameObject.Find("Player").transform.GetChild(0).GetComponent<CamerRay>();
+
+        ParentName = transform.parent.parent.parent.name;
     }
 
     void Update()
     {
-        if (isOn)
+        ParentName = transform.parent.parent.parent.name; //플래쉬 위치 정보 계속 업데이트
+
+        if (ParentName == "Player") //아이템 슬롯 안에 있을 때 (추후 손에 들었을 때 조건 업데이트 필요)
+        {
+            UseItem item = transform.parent.parent.parent.GetComponent<UseItem>();
+            
+            if(timer > 0)
+                item.IsFlash = true;
+            if(timer <= 0)
+                item.IsFlash = false;
+        }
+            
+
+        if (isOn) //손에 들었을 때를 감지하는 조건 필요.
         {
             // Demon 게임 오브젝트 찾기
-            GameObject demon = GameObject.Find("Demon_M(Clone)");
+            GameObject demon = GameObject.Find("Demon_M");
             if (demon != null)
             {
                 var distance = Vector3.Distance(FlashLight_transform.position, demon.transform.position);
@@ -76,23 +95,6 @@ public class FlashLight : MonoBehaviour
                 }
             }
         }
-
-
-
-
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            if (camerRay.isTake)
-            {
-                if (transform.IsChildOf(GameObject.Find("HandPos").transform))
-                {
-                    ToggleFlashlights();
-                }
-            }
-          
-        }
-       
-
     }
 
     private void ToggleFlashlights()
